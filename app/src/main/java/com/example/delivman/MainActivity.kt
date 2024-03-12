@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -31,16 +32,12 @@ import com.yandex.runtime.Error
 import com.yandex.runtime.image.ImageProvider
 
 class MainActivity : AppCompatActivity(), DrivingSession.DrivingRouteListener {
-
-
     private lateinit var mapview:MapView
     var points = mutableListOf<Point>()
 
     private var mapObjects: MapObjectCollection? = null
     private var drivingeRouter: DrivingRouter? = null
     private var drivingSession: DrivingSession? = null
-
-
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +60,7 @@ class MainActivity : AppCompatActivity(), DrivingSession.DrivingRouteListener {
             override fun onMapTap(map: Map, point: Point) {
                 if(!wayFlag){
                     if (points.size==0){
-                        points.add(point) // Добавление точки в список points
+                        points.add(point)
                         var a = mapview.map.mapObjects.addPlacemark(point, ImageProvider.fromResource(applicationContext, R.drawable.startflag))
                         addPointButton.text = "Задайте точки"
                         pointsFlag = true
@@ -110,7 +107,6 @@ class MainActivity : AppCompatActivity(), DrivingSession.DrivingRouteListener {
                     probkiison = false
                     probki.isTrafficVisible = false
                 }
-
             }
         }
         addPointButton.setOnClickListener{
@@ -124,9 +120,8 @@ class MainActivity : AppCompatActivity(), DrivingSession.DrivingRouteListener {
                 val algo = GeneticAlgorithm()
                 algo.matrix = algo.createAdjacencyMatrix(points)
                 val resultIndexes:IntArray = algo.getPath()
-                points = reorderPoints(points,resultIndexes)
-                //здесь переставить чтобы все было тип топ
-                sumbitRequest(points)
+                //val points1 = reorderPoints(points,resultIndexes)
+                sumbitRequest(reorderPoints(points,resultIndexes))//здесь переставить чтобы все было тип топ
             }
         }
         drivingeRouter = DirectionsFactory.getInstance().createDrivingRouter()
@@ -150,7 +145,6 @@ class MainActivity : AppCompatActivity(), DrivingSession.DrivingRouteListener {
             return
         }
     }
-
     override fun onDrivingRoutes(p0: MutableList<DrivingRoute>) {
         mapObjects!!.addPolyline(p0[0].geometry)
     }
@@ -168,10 +162,8 @@ class MainActivity : AppCompatActivity(), DrivingSession.DrivingRouteListener {
         }
         drivingSession = drivingeRouter!!.requestRoutes(requestPoints,drivingOptions,vehicleOptions,this)
     }
-
     fun reorderPoints(points: MutableList<Point>, order: IntArray): MutableList<Point> {
-        // метод для установки
-        val reorderedPoints = mutableListOf<Point>()
+        val reorderedPoints = mutableListOf<Point>()// метод для установки
         for (index in order) {
             reorderedPoints.add(points[index])
         }

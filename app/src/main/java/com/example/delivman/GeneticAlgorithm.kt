@@ -1,10 +1,7 @@
 package com.example.delivman
-
-import com.yandex.mapkit.geometry.Point
-import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
-
+import com.yandex.mapkit.geometry.Point
 class GeneticAlgorithm() {
     var matrix: Array<DoubleArray> = arrayOf()
     private var shortestDistance = Double.MAX_VALUE
@@ -17,14 +14,19 @@ class GeneticAlgorithm() {
     fun getPath(): IntArray {
         val cntCity = matrix.size
         when {
-            cntCity in 3..8 -> {
-                populationSize = 200
+            cntCity in 3..5 -> {
+                populationSize = 30
                 mutationRate = 0.2
-                numGenerations = 50
+                numGenerations = 10
                 crossoverRate = 0.3
             }
-
-            cntCity in 9..20 -> {
+            cntCity in 6..9 -> {
+                populationSize = 100
+                mutationRate = 0.2
+                numGenerations = 600
+                crossoverRate = 0.3
+            }
+            cntCity in 10..20 -> {
                 populationSize = 200
                 mutationRate = 0.2
                 numGenerations = 2000
@@ -61,12 +63,14 @@ class GeneticAlgorithm() {
                 val parent2 = getRandomElement(population)
                 var child1 = parent1
                 var child2 = parent2
+
                 if (Math.random() < crossoverRate){
                     child1 = crossover(parent1, parent2)
                     child2 = crossover(parent1, parent2)
                 }
                 child1 = mutate(child1)
                 child2 = mutate(child2)
+
                 newPopulation.add(child1)
                 newPopulation.add(child2)
             }
@@ -82,6 +86,7 @@ class GeneticAlgorithm() {
         val bestRoute = getBestRoute(population)
         shortestDistance = calculateDistance(bestRoute)
         bestRoute.forEachIndexed { index, value -> bestRouteN[index] = value - 1 }
+
         return bestRouteN
     }
 
@@ -98,7 +103,6 @@ class GeneticAlgorithm() {
             route2.addAll(route)
             route2.add(a)
             population.add(route2 as ArrayList<Int>)
-            //println(route2.toString())
         }
         return population
     }
@@ -144,17 +148,13 @@ class GeneticAlgorithm() {
                 child.add(gene)
             }
         }
-
-        // Добавляем первый и последний элементы обратно
-        child.add(0, firstFirst)
+        child.add(0, firstFirst)// Добавляем первый и последний элементы обратно
         child.add(lastFirst)
-
         return child
     }
 
     fun getRandomElements(population: ArrayList<List<Int>>, count: Int): List<List<Int>> {
         val randomElements = mutableListOf<List<Int>>()
-
         while (randomElements.size < count) {
             val element = population.random()
             if (element !in randomElements) {
@@ -176,9 +176,9 @@ class GeneticAlgorithm() {
         return adjacencyMatrix // Возвращаем матрицу смежности
     }
     private fun calculateDistance1(point1: Point, point2: Point): Double {
-        val v1v = (point1.latitude - point2.latitude)*(point1.latitude - point2.latitude)
+        val v1v = (point1.latitude - point2.latitude) * (point1.latitude - point2.latitude)
         val v2v = (point1.longitude - point2.longitude) * (point1.longitude - point2.longitude)
-        return sqrt(v1v+ v2v)
+        return sqrt(v1v + v2v)
     }
     private fun getRandomElement(population: ArrayList<List<Int>>): List<Int> {
         return population.random()
@@ -189,7 +189,6 @@ class GeneticAlgorithm() {
     private fun calculateDistance(route: List<Int>): Double {
         var distance = 0.0
         val size = route.size
-
         for (i in 0 until size-1) {
             val city1 = route[i] - 1
             val city2 = route[(i + 1) % size] - 1
